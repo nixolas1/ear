@@ -1,3 +1,6 @@
+#Own rules
+songs/*
+
 # Logs
 logs
 *.log
