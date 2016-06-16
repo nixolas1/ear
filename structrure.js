@@ -1,21 +1,21 @@
 //initializing
 ear = new Ear(song)
 
-beat = 
+beat = new Beat(ear, options{frequency, threshold, decay})
 
 //events triggered during song playback
-ear.onBeat()
-ear.onNote(note, func)
-ear.onKick(kick, func)
+beat.onBeat()
+note.onNote(note, func)
+kick.onKick(kick, func)
 ear.onTreble()
 
 //live data
-ear.beat.timeLeft
-ear.beat.amplitude
-ear.note
-ear.note.amplitude
-ear.note.duration
-ear.note.timeLeft
+beat.timeLeft
+beat.amplitude
+note.tone
+note.amplitude
+note.duration
+note.timeLeft
 ear.energy
 ear.amplitude
 ear.waveForm()
@@ -26,7 +26,9 @@ ear.music
     .play
     .stop
     .pause
-    .setTime
+    .setPosition
+    .getPosition
+
 
 
 //get music info
@@ -40,6 +42,7 @@ ear.getNormalizedVolume()
 low = Ear.filter(ear.music, lowpass) //low = audiobuffer?
 kicks = Ear.kickDetect(low, options) //kicks = (time, intensity) array
 beat = Ear.beatAnalyzer(kicks, options) //beat = number or list of times
+
 
 
 
