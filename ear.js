@@ -8,8 +8,9 @@
     this.sections = [];
     this.audio = new Audio();
     this.context = window.AudioContext ? new window.AudioContext() : new window.webkitAudioContext();
-    this.bind('update', update);
   };
+
+
 
   Ear.prototype = {
 
@@ -28,7 +29,8 @@
     },
 
     stop : function () {
-      this.audio.stop();
+      this.audio.pause();
+      this.audio.currentTime = 0;
       this.isPlaying = false;
       return this;
     },
@@ -46,12 +48,13 @@
         return false;
       }
 
+      console.log(this.audio.currentTime)
       if (this.isPlaying) {
-        this.audio.stop(); // Stop any existing playback if there is any
-        this.audio.playbackTime = time;
+        this.audio.pause(); // Stop any existing playback if there is any
+        this.audio.currentTime = time;
         this.audio.play(); // Resume playback at new time
       } else {
-        this.audio.playbackTime = time;
+        this.audio.currentTime = time;
       }
 
       return this;
@@ -88,7 +91,14 @@
       return this;
     },
 
+    /* Modifiers */
 
+    //converts input number to value 0-1 with given smoothnes as max change applied each time it is called
+
+    /*dynamicNormalize : function () {
+      
+    },
+*/
     /* Getters */
 
     getVolume : function () {
@@ -120,7 +130,7 @@
     },
 
     getWaveform : function () {
-      return this.signal;
+        return this.signal;
     },
 
     getSpectrum : function () {
@@ -137,7 +147,7 @@
 
 
     /* Sections */
-
+    /* rewrite/remove
     after : function (time, callback) {
       var _this = this;
       this.sections.push({
@@ -189,63 +199,7 @@
       thisSection = this.sections[this.sections.length - 1];
       return this;
     },
-
-    //initialize source
-    load : function (source) {
-      var path;
-
-      // Loading an Audio element
-      if (source instanceof HTMLElement) {
-        this.source = source;
-
-      // Loading an object with src, [codecs]
-      } else {
-        this.source = window.Audio ? new Audio() : {};
-        this.source.src = Ear._makeSupportedPath(source.src, source.codecs);
-      }
-
-      this.audio = source;
-
-      this.isLoaded = false;
-      this.progress = 0;
-
-      if (!this.context.createScriptProcessor) {
-        this.context.createScriptProcessor = this.context.createJavascriptNode;
-      }
-
-      this.proc = this.context.createScriptProcessor(SAMPLE_SIZE / 2, 1, 1);
-
-      this.proc.onaudioprocess = function (e) {
-        this.update.call(this, e);
-      };
-
-      if (!this.context.createGain) {
-        this.context.createGain = this.context.createGainNode;
-      }
-
-      this.gain = this.context.createGain();
-
-      this.fft = new FFT(SAMPLE_SIZE / 2, SAMPLE_RATE);
-      this.signal = new Float32Array(SAMPLE_SIZE / 2);
-
-      if (this.audio.readyState < 3) {
-        this.audio.addEventListener( 'canplay', function () {
-          connectContext.call(this);
-        });
-      } else {
-        connectContext.call(this);
-      }
-
-      this.audio.addEventListener('progress', function (e) {
-        if (e.currentTarget.duration) {
-          this.progress = e.currentTarget.seekable.end(0) / e.currentTarget.duration;
-        }
-      });
-
-      return this;
-    },
-
-
+*/
     update : function (e) {
       if (!this.isPlaying || !this.isLoaded) return;
 
@@ -268,28 +222,89 @@
       }
 
       this.fft.forward(this.signal);
-      this.dancer.trigger('update');
+
+      for (var i in this.sections) {
+        if (this.sections[i].condition())
+          this.sections[i].callback.call(this);
+      }
+
+      if (this.events["update"])
+        this.trigger('update');
+    },
+
+    //initialize source
+    load : function (source) {
+      var path;
+      parent = this;
+
+      // Loading an Audio element
+      if (source instanceof HTMLElement) {
+        this.source = source;
+        console.log("htmlelement")
+      
+      } else {
+        // Loading an object with src, [codecs]
+        this.source = window.Audio ? new Audio() : {};
+        this.source.src = Ear.makeSupportedPath(source.src, source.codecs);
+        console.log("load", this.source)
+      }
+
+      this.audio = this.source;
+
+      this.isLoaded = false;
+      this.progress = 0;
+
+      if (!this.context.createScriptProcessor) {
+        this.context.createScriptProcessor = this.context.createJavascriptNode;
+      }
+
+      this.proc = this.context.createScriptProcessor(SAMPLE_SIZE / 2, 1, 1);
+
+      this.proc.onaudioprocess = function (e) {
+        parent.update(e);
+      };
+
+      if (!this.context.createGain) {
+        this.context.createGain = this.context.createGainNode;
+      }
+
+      this.gain = this.context.createGain();
+
+      this.fft = new FFT(SAMPLE_SIZE / 2, SAMPLE_RATE);
+      this.signal = new Float32Array(SAMPLE_SIZE / 2);
+
+      if (this.audio.readyState < 3) {
+        this.audio.addEventListener( 'canplay', function () {
+          console.log("canplay trigger", parent)
+          connectContext(parent);
+        });
+      } else {
+        connectContext(this);
+      }
+
+      this.audio.addEventListener('progress', function (e) {
+        if (e.currentTarget.duration) {
+          this.progress = e.currentTarget.seekable.end(0) / e.currentTarget.duration;
+        }
+      });
+
+      return this;
     }
 
   };
 
-  function update () {
-    for (var i in this.sections) {
-      if (this.sections[i].condition())
-        this.sections[i].callback.call(this);
-    }
-  }
 
-  function connectContext () {
-    this.source = this.context.createMediaElementSource(this.audio);
-    this.source.connect(this.proc);
-    this.source.connect(this.gain);
-    this.gain.connect(this.context.destination);
-    this.proc.connect(this.context.destination);
+  function connectContext (ear) {
+    ear.source = ear.context.createMediaElementSource(ear.audio);
+    console.log("connect", ear.source)
+    ear.source.connect(ear.proc);
+    ear.source.connect(ear.gain);
+    ear.gain.connect(ear.context.destination);
+    ear.proc.connect(ear.context.destination);
 
-    this.isLoaded = true;
-    this.progress = 1;
-    this.dancer.trigger('loaded');
+    ear.isLoaded = true;
+    ear.progress = 1;
+    ear.trigger('loaded');
   }
 
   window.Ear = Ear;

@@ -1,25 +1,41 @@
 //initializing
 ear = new Ear(song)
 
+
+ear.onBeat({}, func)
 beat = new Beat(ear, options{frequency, threshold, decay})
 
+
+
+
+
+ear.volume.left.normalize
+
+
+
+
 //events triggered during song playback
-beat.onBeat()
+beat.onBeat(func)
+vs
 note.onNote(note, func)
 kick.onKick(kick, func)
-ear.onTreble()
+ear.onTreble
+vs
+ear.onEvent('note')
 
 //live data
-beat.timeLeft
-beat.amplitude
-note.tone
-note.amplitude
-note.duration
-note.timeLeft
-ear.energy
-ear.amplitude
-ear.waveForm()
-ear.spectrum()
+beat.getTimeLeft
+beat.getAmplitude
+
+note.getTone
+note.getAmplitude
+note.getDuration
+note.getTimeLeft
+
+ear.getEnergy
+ear.getAmplitude
+ear.getWaveForm()
+ear.getSpectrum()
 
 //get raw music stream data
 ear.music
@@ -34,16 +50,24 @@ ear.music
 //get music info
 ear.getMaxAmplitude(start, stop)
 ear.getMinAmplitude(start, stop)
-ear.getTempo()
+ear.getTempo(start, stop)
 ear.getDuration()
 ear.getNormalizedVolume()
 
 //piping (for internal use and advanced usage)
 low = Ear.filter(ear.music, lowpass) //low = audiobuffer?
 kicks = Ear.kickDetect(low, options) //kicks = (time, intensity) array
+
 beat = Ear.beatAnalyzer(kicks, options) //beat = number or list of times
 
 
+//endringer i tempo
+
+instream = load('lol.mp3')
+
+instream.filter('lowpass', threshold=440).filter('highpass')
+    .onKick(myFunc)
+    .onBeat(myBeatFunc)
 
 
 //advanced analysis events. Not priority
