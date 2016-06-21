@@ -26,34 +26,12 @@
         <script src="lib/support.js"></script>
         <script src="lib/fft.js"></script>
         <script src="lib/waveform.js"></script>
+
+        <script src="plugins/ear.normalizer.js"></script>
+
         <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
         <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>-->
-        <script type="text/javascript">
-            var songs = ["bepop.mp3", "better.mp3", "breeze.mp3", "cold.mp3", "fade.mp3", "fuck.mp3", "funk.mp3", "good.mp3", "hungry.mp3", "intro_altj.mp3", "ipaena.mp3", "love.mp3", "matilda.mp3", "mykonos.mp3", "norge.mp3", "nothingness.mp3", "pizza.mp3", "plans.mp3", "ridge.mp3", "sage.mp3"];
-            var song = songs[Math.floor(Math.random() * songs.length)]
-            var AUDIO_FILE = "./songs/"+"love.mp3"//song;
-            var canvas = $("#canvas")[0];
-
-            var ear = new Ear();
-            ear.load({ src: AUDIO_FILE});
-            
-            ear.bind("loaded", loaded);
-            ear.bind("update", onUpdate);
-
-            function loaded(){
-                ear.waveform( canvas, { strokeStyle: '#666', strokeWidth: 2 });
-                ear.play();
-            }
-            function onUpdate(){
-                //console.log(ear.getWaveform());
-                //var normalizer = new Ear.Normalizer({dynamic: true, slowness: 10, overflow: true})
-                //normalizer.normalize(ear.getFrequency)
-
-                var out = ear.getFrequency(0, 50);
-                //var out = ear.dynamicNormalize(ear.getFrequency(0, 50));
-                $("#test_out").css("opacity", out);
-            }
-        </script>
+        <script type="text/javascript" src="player.js"></script>
     </body>
 </html>
     

@@ -48,7 +48,6 @@
         return false;
       }
 
-      console.log(this.audio.currentTime)
       if (this.isPlaying) {
         this.audio.pause(); // Stop any existing playback if there is any
         this.audio.currentTime = time;
@@ -117,7 +116,7 @@
       return this.audio.currentTime;
     },
 
-    // Returns the magnitude of a frequency or average over a range of frequencies
+    // Returns the magnitude of a frequency or average over a range of frequencies, max is 512
     getFrequency : function (freq, endFreq) {
       var sum = 0;
       if (endFreq !== undefined) {
@@ -134,7 +133,7 @@
     },
 
     getSpectrum : function () {
-      return this.fft.spectrum;
+      return this.fft.spectrum; //length: 512
     },
 
     isLoaded : function () {
@@ -246,7 +245,7 @@
         // Loading an object with src, [codecs]
         this.source = window.Audio ? new Audio() : {};
         this.source.src = Ear.makeSupportedPath(source.src, source.codecs);
-        console.log("load", this.source)
+        //console.log("load", this.source)
       }
 
       this.audio = this.source;
@@ -275,7 +274,7 @@
 
       if (this.audio.readyState < 3) {
         this.audio.addEventListener( 'canplay', function () {
-          console.log("canplay trigger", parent)
+          //console.log("canplay trigger", parent)
           connectContext(parent);
         });
       } else {
@@ -296,7 +295,7 @@
 
   function connectContext (ear) {
     ear.source = ear.context.createMediaElementSource(ear.audio);
-    console.log("connect", ear.source)
+    //console.log("connect", ear.source)
     ear.source.connect(ear.proc);
     ear.source.connect(ear.gain);
     ear.gain.connect(ear.context.destination);
