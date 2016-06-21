@@ -6,10 +6,12 @@ var Normalizer  = function (options) {
     this.dampingMultiplier = options.dampingMultiplier || 10; //difference between positive and negative change in max values
     this.multiplier = options.multiplier || 1; //simply multiplies the output with given number
     this.overflow = options.overflow || false; //allow value to overflow 1 when there is a higher input than normal
+    this.smoothness = options.smoothness || 0;
 
     this.maximum = 0;
     this.minimum = 0;
     this.current = 0;
+    this.previous = [];
 
     if(this.damping < 1)
         this.damping = 1;
@@ -52,6 +54,23 @@ Normalizer.prototype = {
             this.current = (value - this.minimum) / this.maximum;
             return this.current;
         }
+    },
+
+    smooth : function(value) {
+        this.previous.push(value);
+        var sum = 0;
+        var length = this.previous.length;
+
+        for(var i = 0; i < length; i++){
+            sum += this.previous[i];
+        }
+
+        if(length >= this.smoothness){
+            this.previous.shift();
+        }
+
+        return sum/length;
+
     },
 
     reset : function() {

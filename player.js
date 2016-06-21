@@ -11,6 +11,9 @@ ear.bind("loaded", loaded);
 ear.bind("update", onUpdate);
 
 var normalizer = new Ear.Normalizer({dynamic: true, damping: 1000, overflow: false, dampingMultiplier: 10})
+//var lowpass = new Ear.Filter(type="lowpass")
+//var beat = new Ear.Beatalyzer(ear, {});
+//beat = ear.onBeat(filter="lowpass", )
 
 function loaded(){
     ear.waveform( canvas, { strokeStyle: '#666', strokeWidth: 2 });
